@@ -93,7 +93,7 @@ if [[ -f ${WGSEFIN}/bin/micromamba && -d ${WGSEFIN}/micromamba/ ]]; then
     
     if [[ ${DEL_OLD_YN} == ["y","Y"] ]]; then
         echo_tee "Deleting old files and folders."
-        rm -rf ${WGSEFIN}/bin/micromamba
+        rm -rf ${WGSEFIN}/bin/
         rm -rf ${WGSEFIN}/micromamba/
     else
         echo_tee "Keeping old files and folders."
@@ -109,6 +109,12 @@ echo_tee ""
 # TODO: Compile a static micromamba binary and package it in installer. The micromamba-releases binary
 # is dymanically linked to glibc so does not work with musl-based distros. Ideally, this micromamba
 # environment would wish to run on any Linux distro.
+if [ ! -d "${WGSEFIN}/bin" ]; then
+    mkdir ${WGSEFIN}/bin
+elif [ -f "${WGSEFIN}/bin/micromamba" ]; then
+    rm -rf ${WGSEFIN}/bin/micromamba
+fi
+
 if command -v curl &>/dev/null; then
     curl -L ${VERBOSE_CURL} https://github.com/mamba-org/micromamba-releases/releases/latest/download/micromamba-linux-64 -o ${WGSEFIN}/bin/micromamba
 elif command -v wget &>/dev/null; then
