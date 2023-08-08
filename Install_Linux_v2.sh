@@ -112,7 +112,7 @@ echo_tee ""
 if [ ! -d "${WGSEFIN}/bin" ]; then
     mkdir ${WGSEFIN}/bin
 elif [ -f "${WGSEFIN}/bin/micromamba" ]; then
-    rm -rf ${WGSEFIN}/bin/micromamba
+    rm -f ${WGSEFIN}/bin/micromamba
 fi
 
 if command -v curl &>/dev/null; then
@@ -144,7 +144,7 @@ micromamba_abort () {
         echo_tee ""
         echo_tee "Deleting files and folders (except log file) from failed installation attempt and aborting now."
         micromamba deactivate
-        rm -rf ${WGSEFIN}/bin/micromamba
+        rm -f ${WGSEFIN}/bin/micromamba
         rm -rf ${WGSEFIN}/micromamba/
         sleep 2
         echo_tee ""
@@ -229,7 +229,7 @@ if [[ ${CACHE_DEL_YN} == ["y","Y"] ]]; then
         rm -rf ~/.mamba/
     fi
 
-    rm -rf ${WGSEFIN}/micromamba/cache/pip
+    rm -rf ${WGSEFIN}/micromamba/cache/pip/
     echo_tee "Caches deleted."
     echo_tee ""
 else
