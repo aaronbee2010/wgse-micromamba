@@ -13,7 +13,7 @@ export WGSEFIN="${WGSEABS}"                # Removed escape any embedded spaces;
 cd "${WGSEFIN}"
 # echo '******** WGSEFIN:' "${WGSEFIN}"
 
-source ${WGSEFIN}/scripts/Terminal_Linux_v2.sh # Restart in Terminal if not in one
+source ${WGSEFIN}/scripts/Terminal_Linux.sh # Restart in Terminal if not in one
 
 echo ""
 echo "\_/"
