@@ -30,10 +30,11 @@ echo ""
 
 if [[ ${UNINSTALL_DEL_YN} == ["y","Y"] ]]; then
     echo "Uninstalling WGS Extract..."
+    echo ""
     rm -f ~/.wgsextract
-    find ${WGSEFIN}/ -mindepth 1 -maxdepth 1 -type d -not -name scripts -not -name .git -exec echo rm -rf '{}' \;
-    find ${WGSEFIN}/scripts/ -mindepth 1 -maxdepth 1 -type f -not -name Terminal_Linux_v2.sh -not -name zcommon_v2.sh -not -name zinstall_common_v2.sh -exec echo rm -f '{}' \;
-    find ${WGSEFIN}/ -mindepth 1 -maxdepth 1 -type f -not -name Install_Linux_v2.sh -not -name LICENSE -not -name README.md -not -name Run_Linux_v2.sh -not -name Uninstall_Linux_v2.sh -exec echo rm -f '{}' \;
+    find ${WGSEFIN}/ -mindepth 1 -maxdepth 1 -type d -not -name scripts -not -name .git -exec rm -rf '{}' \;
+    find ${WGSEFIN}/scripts/ -mindepth 1 -maxdepth 1 -type f -not -name Terminal_Linux_v2.sh -not -name zcommon_v2.sh -not -name zinstall_common_v2.sh -exec rm -f '{}' \;
+    find ${WGSEFIN}/ -mindepth 1 -maxdepth 1 -type f -not -name Install_Linux_v2.sh -not -name LICENSE -not -name README.md -not -name Run_Linux_v2.sh -not -name Uninstall_Linux_v2.sh -exec rm -f '{}' \;
     echo "WGS Extract has been uninstalled."
     echo ""
 fi
