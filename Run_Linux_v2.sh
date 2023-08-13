@@ -23,7 +23,7 @@ echo "\_/"
 echo "/ \\"
 echo ""
 
-if [[ ! -f ${WGSEFIN}/bin/micromamba || ! -d ${WGSEFIN}/micromamba/ ]]; then
+if [[ ! -d ${WGSEFIN}/micromamba/ ]]; then
     echo "ERROR: It appears you haven't installed WGS Extract via the \"install.sh\" script."
     echo "Please install WGS Extract via this method then run this script."
     echo ""
@@ -34,7 +34,7 @@ if [[ ! -f ${WGSEFIN}/bin/micromamba || ! -d ${WGSEFIN}/micromamba/ ]]; then
     
 fi
 
-eval "$(${WGSEFIN}/bin/micromamba shell hook -s bash --prefix ${WGSEFIN}/micromamba)"
+eval "$(${WGSEFIN}/micromamba/bin/micromamba shell hook -s bash --prefix ${WGSEFIN}/micromamba)"
 micromamba activate --prefix ${WGSEFIN}/micromamba
 
 python ${WGSEFIN}/program/wgsextract.py

@@ -86,14 +86,13 @@ else
     VERBOSE_CURL="-s"
 fi
 
-if [[ -f ${WGSEFIN}/bin/micromamba && -d ${WGSEFIN}/micromamba/ ]]; then
+if [[ -d ${WGSEFIN}/micromamba/ ]]; then
     echo_tee "WARNING: Files and folders from a previous execution of this script have been detected. Would you like to"
     read -p "delete them to make room for a fresh installation? Type \"y\" or \"Y\" to delete or anything else to keep: " DEL_OLD_YN
     echo_tee ""
     
     if [[ ${DEL_OLD_YN} == ["y","Y"] ]]; then
         echo_tee "Deleting old files and folders."
-        rm -rf ${WGSEFIN}/bin/
         rm -rf ${WGSEFIN}/micromamba/
     else
         echo_tee "Keeping old files and folders."
@@ -109,16 +108,16 @@ echo_tee ""
 # TODO: Compile a static micromamba binary and package it in installer. The micromamba-releases binary
 # is dymanically linked to glibc so does not work with musl-based distros. Ideally, this micromamba
 # environment would wish to run on any Linux distro.
-if [ ! -d "${WGSEFIN}/bin" ]; then
-    mkdir ${WGSEFIN}/bin
-elif [ -f "${WGSEFIN}/bin/micromamba" ]; then
-    rm -f ${WGSEFIN}/bin/micromamba
+mkdir -p ${WGSEFIN}/micromamba/{bin,cache/pip,jdk8,jdk11}
+
+if [ -f "${WGSEFIN}/micromamba/bin/micromamba" ]; then
+    rm -f ${WGSEFIN}/micromamba/bin/micromamba
 fi
 
 if command -v curl &>/dev/null; then
-    curl -L ${VERBOSE_CURL} https://github.com/mamba-org/micromamba-releases/releases/latest/download/micromamba-linux-64 -o ${WGSEFIN}/bin/micromamba
+    curl -L ${VERBOSE_CURL} https://github.com/mamba-org/micromamba-releases/releases/latest/download/micromamba-linux-64 -o ${WGSEFIN}/micromamba/bin/micromamba
 elif command -v wget &>/dev/null; then
-    wget ${VERBOSE} -O ${WGSEFIN}/bin/micromamba https://github.com/mamba-org/micromamba-releases/releases/latest/download/micromamba-linux-64
+    wget ${VERBOSE} -O ${WGSEFIN}/micromamba/bin/micromamba https://github.com/mamba-org/micromamba-releases/releases/latest/download/micromamba-linux-64
 else
     echo_tee "ERROR: Neither curl or wget appear to be available on \$PATH."
     echo_tee "Please install one of these utilities then run this installer again."
@@ -126,9 +125,9 @@ else
     echo_tee ""
     exit 1
 fi
-chmod 755 ${WGSEFIN}/bin/micromamba
-mkdir -p ${WGSEFIN}/micromamba/{cache/pip,jdk8,jdk11}
-eval "$(${WGSEFIN}/bin/micromamba shell hook -s bash --prefix ${WGSEFIN}/micromamba)"
+chmod 755 ${WGSEFIN}/micromamba/bin/micromamba
+
+eval "$(${WGSEFIN}/micromamba/bin/micromamba shell hook -s bash --prefix ${WGSEFIN}/micromamba)"
 micromamba activate --prefix ${WGSEFIN}/micromamba
 micromamba update -y -a &>/dev/null
 
@@ -144,7 +143,6 @@ micromamba_abort () {
         echo_tee ""
         echo_tee "Deleting files and folders (except log file) from failed installation attempt and aborting now."
         micromamba deactivate
-        rm -f ${WGSEFIN}/bin/micromamba
         rm -rf ${WGSEFIN}/micromamba/
         sleep 2
         echo_tee ""
@@ -157,13 +155,14 @@ echo_tee "[1/5] Installing basic Unix utilities."
 echo_tee ""
 
 micromamba install -y -r ${WGSEFIN}/micromamba -c conda-forge \
-sed coreutils zip unzip bash grep curl p7zip jq dos2unix ${VERBOSE} | \
+sed coreutils zip unzip bash \
+grep curl p7zip jq dos2unix ${VERBOSE} | \
 tee -a ${WGSEFIN}/Install_Linux_${DATE_TIME}.log
 
 micromamba_abort
 
 echo_tee ""
-echo_tee "[2/5] Installing Python base and Python libraries required by WGS Extract."
+echo_tee "[2/5] Installing Python base required by WGS Extract."
 echo_tee ""
 
 micromamba install -y -r ${WGSEFIN}/micromamba -c conda-forge \
@@ -172,23 +171,19 @@ tee -a ${WGSEFIN}/Install_Linux_${DATE_TIME}.log
 
 micromamba_abort
 
-pip3 install ${VERBOSE} --cache-dir ${WGSEFIN}/micromamba/cache/pip \
-pillow pyliftover pyscreenshot openpyxl pandas psutil multiqc wakepy | \
-tee -a ${WGSEFIN}/Install_Linux_${DATE_TIME}.log
-
 echo_tee ""
 echo_tee "[3/5] Installing OpenJDK 8 and 11."
 echo_tee ""
 
 micromamba deactivate
 micromamba activate --prefix ${WGSEFIN}/micromamba/jdk8
-micromamba install ${VERBOSE} -y -r ${WGSEFIN}/micromamba/jdk8 -c conda-forge openjdk=8.0.332 | \
+micromamba install ${VERBOSE} -y -r ${WGSEFIN}/micromamba/jdk8 -c conda-forge openjdk | \
 tee -a ${WGSEFIN}/Install_Linux_${DATE_TIME}.log
 micromamba update -y -a &>/dev/null
 
 micromamba deactivate
 micromamba activate --prefix ${WGSEFIN}/micromamba/jdk11
-micromamba install ${VERBOSE} -y -r ${WGSEFIN}/micromamba/jdk11 -c conda-forge openjdk=11.0.15 | \
+micromamba install ${VERBOSE} -y -r ${WGSEFIN}/micromamba/jdk11 -c conda-forge openjdk | \
 tee -a ${WGSEFIN}/Install_Linux_${DATE_TIME}.log
 micromamba update -y -a &>/dev/null
 
@@ -204,7 +199,8 @@ echo_tee ""
 # Bowtie2 omitted due to incompatibility with Python 3.11
 # Conda-forge needed to install dependencies of specified packages
 micromamba install ${VERBOSE} -y -r ${WGSEFIN}/micromamba -c conda-forge -c bioconda \
-bwa bwa-mem2 minimap2 hisat2 pbmm2 samtools bcftools tabix fastp | \
+bwa bwa-mem2 minimap2 hisat2 \
+pbmm2 samtools bcftools tabix fastp | \
 tee -a ${WGSEFIN}/Install_Linux_${DATE_TIME}.log
 
 micromamba_abort

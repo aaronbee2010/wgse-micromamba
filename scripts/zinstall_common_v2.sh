@@ -32,7 +32,7 @@ source ${WGSEFIN}/scripts/zcommon_v2.sh dummy
 cpuarch=$1
 case $OSTYPE in
   linux*)
-    if [[ -f ${WGSEFIN}/bin/micromamba && -d ${WGSEFIN}/micromamba/ ]]; then
+    if [[ -d ${WGSEFIN}/micromamba/ ]]; then
       cpuarch="micromamba" # Set $cpuarch to "micromamba" if files from a micromamba install are detected.
     else
       cpuarch=$2 # Instead use the Ubuntu major release number for the cpuarch variable
@@ -57,10 +57,12 @@ case "${OSTYPE}:${cpuarch}" in    # MacOS passes arch as first arg; maj/min vers
                               cmdlist+=( tkmacosx "$opt" )  ;;  # MacOS extra package for tkinter colored buttons
   darwin*:x86_64*)          PIP=( arch -x86_64 /usr/local/bin/pip3 )
                               cmdlist+=( tkmacosx "$opt" )  ;;
-  linux*:micromamba)        ;;
   linux*:18*)               PIP=( sudo -H python3 -m pip )      # 18.x Ubuntu pip errors out
                               opt=""  ;;                        # $opt not recognized in 18.x Ubuntu pip
   linux*:20* | linux*:22*)  PIP=( pip3 )
+                              cmdlist+=(          "$opt" )  ;;
+  linux*:micromamba)        PIP=( pip3 )
+                              opt+=" ${VERBOSE} --cache-dir ${WGSEFIN}/micromamba/cache/pip"  # Make sure to save cache files within micromamba environment directory
                               cmdlist+=(          "$opt" )  ;;
   msys* | cygwin*)          PIP=( python/python.exe -m pip )    # pip3 in cygwin64 requires python/ and
                               cmdlist+=(          "$opt" )  ;;  #  python/scripts be on the path
@@ -68,23 +70,20 @@ case "${OSTYPE}:${cpuarch}" in    # MacOS passes arch as first arg; maj/min vers
       (return 0 2>/dev/null) && return 1 || exit 1 ;;
 esac
 
-# Only run pip3 package installation if micromamba is not currently installed.
-if [[ ${cpuarch} != "micromamba" ]]; then
-  [ ! -e temp ] && mkdir temp     # Make sure temp/ folder is there to take pip_install.log; could put in scripts/ ?
+[ ! -e temp ] && mkdir temp     # Make sure temp/ folder is there to take pip_install.log; could put in scripts/ ?
 
-  IFS=" " read -r -a cmd <<< "${PIP[@]}" ; cmd+=(install --upgrade pip "$opt")
-  "${cmd[@]}" | tee    temp/pip_install.log | grep -v "Requirement already satisfied\|^Collecting\|Preparing\|Running\|Using legacy\|Using cached"
+IFS=" " read -r -a cmd <<< "${PIP[@]}" ; cmd+=(install --upgrade pip "$opt")
+"${cmd[@]}" | tee    temp/pip_install.log | grep -v "Requirement already satisfied\|^Collecting\|Preparing\|Running\|Using legacy\|Using cached"
 
-  IFS=" " read -r -a cmd <<< "${PIP[@]}" ; cmd+=( "${cmdlist[@]}" )
-  "${cmd[@]}" | tee -a temp/pip_install.log | grep -v "Requirement already satisfied\|^Collecting\|Preparing\|Running\|Using legacy\|Using cached"
-  # We use the GREP to remove the common, success strings on the many packages and dependencies.  Slims down output.
+IFS=" " read -r -a cmd <<< "${PIP[@]}" ; cmd+=( "${cmdlist[@]}" )
+"${cmd[@]}" | tee -a temp/pip_install.log | grep -v "Requirement already satisfied\|^Collecting\|Preparing\|Running\|Using legacy\|Using cached"
+# We use the GREP to remove the common, success strings on the many packages and dependencies.  Slims down output.
 
-  # Todo MultiQC has bug with Windows release; cannot run from different disk than files it operates on
-  #   so need to patch the python code in the library to get around / enable.
-  #   See https://gitter.im/ewels/MultiQC?at=622591f9ddcba117a20d53d4
+# Todo MultiQC has bug with Windows release; cannot run from different disk than files it operates on
+#   so need to patch the python code in the library to get around / enable.
+#   See https://gitter.im/ewels/MultiQC?at=622591f9ddcba117a20d53d4
 
-  echo '... finished upgrading Python 3.x libraries'
-fi
+echo '... finished upgrading Python 3.x libraries'
 
 # NOTE: in v4, pulled the Reference Library out to a seperately installed, versioned ZIP. No longer use a full ZIP.
 #  Microarray templates moved into the Reference Library as well. Also moved yLeaf, Haplogrep and FastQC to a

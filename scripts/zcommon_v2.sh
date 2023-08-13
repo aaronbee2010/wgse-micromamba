@@ -40,7 +40,7 @@ case $OSTYPE in
     fi   ;;
   linux*)
     # If micromamba has been set up, then the bash bin from that env will get priority on $PATH
-    if [[ -f ${WGSEFIN}/bin/micromamba && -d ${WGSEFIN}/micromamba/ ]]; then
+    if [[ -d ${WGSEFIN}/micromamba/ ]]; then
       bashx="bash" # ${WGSEFIN}/micromamba/bin/bash
 
       # We'll set osrelease to micromamba while we're here, so we can
