@@ -13,7 +13,7 @@ export WGSEFIN="${WGSEABS}"                # Removed escape any embedded spaces;
 cd "${WGSEFIN}"
 # echo '******** WGSEFIN:' "${WGSEFIN}"
 
-source ${WGSEFIN}/scripts/Terminal_Linux.sh # Restart in Terminal if not in one
+source ${WGSEFIN}/scripts/Terminal_Linux_v2.sh # Restart in Terminal if not in one
 
 echo ""
 echo "\_/"
@@ -33,8 +33,8 @@ if [[ ${UNINSTALL_DEL_YN} == ["y","Y"] ]]; then
     echo ""
     rm -f ~/.wgsextract
     find ${WGSEFIN}/ -mindepth 1 -maxdepth 1 -type d -not -name scripts -not -name .git -exec rm -rf '{}' \;
-    find ${WGSEFIN}/scripts/ -mindepth 1 -maxdepth 1 -type f -not -name Terminal_Linux.sh -not -name zcommon.sh -not -name zinstall_common.sh -exec rm -f '{}' \;
-    find ${WGSEFIN}/ -mindepth 1 -maxdepth 1 -type f -not -name Install_Linux.sh -not -name LICENSE -not -name README.md -not -name Run_Linux.sh -not -name Uninstall_Linux.sh -exec rm -f '{}' \;
+    find ${WGSEFIN}/scripts/ -mindepth 1 -maxdepth 1 -type f -not -name Terminal_Linux_v2.sh -not -name zcommon_v2.sh -not -name zinstall_common_v2.sh -exec rm -f '{}' \;
+    find ${WGSEFIN}/ -mindepth 1 -maxdepth 1 -type f -not -name Install_Linux_v2.sh -not -name LICENSE -not -name README.md -not -name Run_Linux_v2.sh -not -name Uninstall_Linux_v2.sh -exec rm -f '{}' \;
     echo "WGS Extract has been uninstalled."
     echo ""
 fi

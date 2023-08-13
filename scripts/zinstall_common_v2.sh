@@ -26,7 +26,7 @@ declare bashx
 declare reflibdir
 declare replace
 declare upgrade
-source ${WGSEFIN}/scripts/zcommon.sh dummy
+source ${WGSEFIN}/scripts/zcommon_v2.sh dummy
 
 # cpuarch=$(uname -m)   # Now passed in as first parameter just so we can require a parameter for this internal script
 cpuarch=$1

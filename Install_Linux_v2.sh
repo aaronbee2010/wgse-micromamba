@@ -21,7 +21,7 @@ echo_tee () {
     echo "$1" | tee -a ${WGSEFIN}/Install_Linux_${DATE_TIME}.log
 }
 
-source ${WGSEFIN}/scripts/Terminal_Linux.sh # Restart in Terminal if not in one
+source ${WGSEFIN}/scripts/Terminal_Linux_v2.sh # Restart in Terminal if not in one
 
 echo_tee ""
 echo_tee "\_/"
@@ -243,7 +243,7 @@ echo_tee ""
 echo_tee "[5/5] Installing WGS Extract."
 echo_tee ""
 
-bash ${WGSEFIN}/scripts/zinstall_common.sh dummy
+bash ${WGSEFIN}/scripts/zinstall_common_v2.sh dummy
 status=$?
 
 if [[ $status -eq 0 ]]; then

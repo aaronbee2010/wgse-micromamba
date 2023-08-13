@@ -471,7 +471,7 @@ install_or_upgrade() {    # $1 is package
             darwin*)          ${bashx} Install_macos.command  ;;
             linux*)
               if [[ ${osrelease} == "micromamba" ]]; then
-                ${bashx} ${WGSEFIN}/Install_Linux.sh
+                ${bashx} ${WGSEFIN}/Install_Linux_v2.sh
               else
                 ${bashx} Install_ubuntu.sh
               fi
