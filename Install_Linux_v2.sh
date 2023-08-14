@@ -177,13 +177,13 @@ echo_tee ""
 
 micromamba deactivate
 micromamba activate --prefix ${WGSEFIN}/micromamba/jdk8
-micromamba install ${VERBOSE} -y -r ${WGSEFIN}/micromamba/jdk8 -c conda-forge openjdk | \
+micromamba install ${VERBOSE} -y -r ${WGSEFIN}/micromamba/jdk8 -c conda-forge openjdk=8.0.332 | \
 tee -a ${WGSEFIN}/Install_Linux_${DATE_TIME}.log
 micromamba update -y -a &>/dev/null
 
 micromamba deactivate
 micromamba activate --prefix ${WGSEFIN}/micromamba/jdk11
-micromamba install ${VERBOSE} -y -r ${WGSEFIN}/micromamba/jdk11 -c conda-forge openjdk | \
+micromamba install ${VERBOSE} -y -r ${WGSEFIN}/micromamba/jdk11 -c conda-forge openjdk=11.0.15 | \
 tee -a ${WGSEFIN}/Install_Linux_${DATE_TIME}.log
 micromamba update -y -a &>/dev/null
 
