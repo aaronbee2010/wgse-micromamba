@@ -69,36 +69,38 @@ if [[ -n $(ldd --version 2>/dev/stdout | head -1 | grep 'musl libc') ]]; then
     exit 1
 fi
 
-echo_tee "Would you like to run the installer in verbose mode?"
-echo_tee ""
-read -p "Type \"y\" or \"Y\" to run the installer like this or anything else for quiet mode: " VERBOSE_YN
-echo_tee ""
+if [[ $1 != "restart" ]]; then
+    echo_tee "Would you like to run the installer in verbose mode?"
+    echo_tee ""
+    read -p "Type \"y\" or \"Y\" to run the installer like this or anything else for quiet mode: " VERBOSE_YN
+    echo_tee ""
 
-if [[ ${VERBOSE_YN} == ["y","Y"] ]]; then
-    echo_tee "Running in verbose mode."
-    echo_tee ""
-    export VERBOSE=""
-    export VERBOSE_CURL=""
-else
-    echo_tee "Running in quiet mode."
-    echo_tee ""
-    export VERBOSE="-q"
-    export VERBOSE_CURL="-s"
-fi
-
-if [[ -d ${WGSEFIN}/micromamba/ ]]; then
-    echo_tee "WARNING: Files and folders from a previous execution of this script have been detected. Would you like to"
-    read -p "delete them to make room for a fresh installation? Type \"y\" or \"Y\" to delete or anything else to keep: " DEL_OLD_YN
-    echo_tee ""
-    
-    if [[ ${DEL_OLD_YN} == ["y","Y"] ]]; then
-        echo_tee "Deleting old files and folders."
-        rm -rf ${WGSEFIN}/micromamba/
+    if [[ ${VERBOSE_YN} == ["y","Y"] ]]; then
+        echo_tee "Running in verbose mode."
+        echo_tee ""
+        export VERBOSE=""
+        export VERBOSE_CURL=""
     else
-        echo_tee "Keeping old files and folders."
+        echo_tee "Running in quiet mode."
+        echo_tee ""
+        export VERBOSE="-q"
+        export VERBOSE_CURL="-s"
     fi
-    
-    echo_tee ""
+
+    if [[ -d ${WGSEFIN}/micromamba/ ]]; then
+        echo_tee "WARNING: Files and folders from a previous execution of this script have been detected. Would you like to"
+        read -p "delete them to make room for a fresh installation? Type \"y\" or \"Y\" to delete or anything else to keep: " DEL_OLD_YN
+        echo_tee ""
+        
+        if [[ ${DEL_OLD_YN} == ["y","Y"] ]]; then
+            echo_tee "Deleting old files and folders."
+            rm -rf ${WGSEFIN}/micromamba/
+        else
+            echo_tee "Keeping old files and folders."
+        fi
+        
+        echo_tee ""
+    fi
 fi
 
 echo_tee "Downloading portable instance of Micromamba package manager to WGS Extract directory"
@@ -205,32 +207,34 @@ tee -a ${WGSEFIN}/Install_Linux_${DATE_TIME}.log
 
 micromamba_abort
 
-echo_tee "Would you like to delete any caches?"
-echo_tee ""
-read -p "Type \"y\" or \"Y\" to delete caches or anything else to keep: " CACHE_DEL_YN
-echo_tee ""
-
-if [[ ${CACHE_DEL_YN} == ["y","Y"] ]]; then
-    echo_tee "Deleting caches."
+if [[ $1 != "restart" ]]; then
+    echo_tee "Would you like to delete any caches?"
     echo_tee ""
-    micromamba clean ${VERBOSE} -y -a
-    # Deletes useless ~/micromamba/ and ~/.mamba/ folders generated as byproduct of above statement
-    if [[ -z $(ls ~/micromamba/ | grep -v 'pkgs') && \
-          -z $(ls ~/micromamba/pkgs/ | grep -v 'urls.txt') && \
-          ! -s ~/micromamba/pkgs/urls.txt && \
-          -z $(ls ~/.mamba/ | grep -v 'pkgs') && \
-          -z $(ls ~/.mamba/pkgs/ | grep -v 'urls.txt') && \
-          ! -s ~/.mamba/pkgs/urls.txt ]]; then
-        rm -rf ~/micromamba/
-        rm -rf ~/.mamba/
+    read -p "Type \"y\" or \"Y\" to delete caches or anything else to keep: " CACHE_DEL_YN
+    echo_tee ""
+
+    if [[ ${CACHE_DEL_YN} == ["y","Y"] ]]; then
+        echo_tee "Deleting caches."
+        echo_tee ""
+        micromamba clean ${VERBOSE} -y -a
+        # Deletes useless ~/micromamba/ and ~/.mamba/ folders generated as byproduct of above statement
+        if [[ -z $(ls ~/micromamba/ | grep -v 'pkgs') && \
+            -z $(ls ~/micromamba/pkgs/ | grep -v 'urls.txt') && \
+            ! -s ~/micromamba/pkgs/urls.txt && \
+            -z $(ls ~/.mamba/ | grep -v 'pkgs') && \
+            -z $(ls ~/.mamba/pkgs/ | grep -v 'urls.txt') && \
+            ! -s ~/.mamba/pkgs/urls.txt ]]; then
+            rm -rf ~/micromamba/
+            rm -rf ~/.mamba/
+        fi
+
+        rm -rf ${WGSEFIN}/micromamba/cache/pip/
+        echo_tee "Caches deleted."
+        echo_tee ""
+    else
+        echo_tee "Keeping caches."
+        echo_tee ""
     fi
-
-    rm -rf ${WGSEFIN}/micromamba/cache/pip/
-    echo_tee "Caches deleted."
-    echo_tee ""
-else
-    echo_tee "Keeping caches."
-    echo_tee ""
 fi
 
 # Handling WGS Extract program, Python Library and Java programs via the Common script

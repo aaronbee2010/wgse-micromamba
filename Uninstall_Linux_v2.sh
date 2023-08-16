@@ -50,6 +50,7 @@ if [[ ${UNINSTALL_DEL_YN} == ["y","Y"] ]]; then
     -not -name README.md \
     -not -name Run_Linux_v2.sh \
     -not -name Uninstall_Linux_v2.sh \
+    -not -name Install_Linux_*.log \
     -exec rm -f '{}' \;
     
     echo "WGS Extract has been uninstalled."

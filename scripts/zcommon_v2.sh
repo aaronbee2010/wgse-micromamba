@@ -41,11 +41,13 @@ case $OSTYPE in
   linux*)
     # If micromamba has been set up, then the bash bin from that env will get priority on $PATH
     if [[ -d ${WGSEFIN}/micromamba/ ]]; then
-      bashx="bash" # ${WGSEFIN}/micromamba/bin/bash
-
+      # ${WGSEFIN}/micromamba/bin/bash
+      bashx="bash"
       # We'll set osrelease to micromamba while we're here, so we can
       # have other parts of the code run properly if micromamba has been installed
       osrelease="micromamba"
+      # Carry over verbosity settings from Install_Linux(_v2).sh
+      export curlx="curl -kLC - --retry 5 ${VERBOSE_CURL}"
     else
       bashx="/usr/bin/bash"
     fi
@@ -471,7 +473,7 @@ install_or_upgrade() {    # $1 is package
             darwin*)          ${bashx} Install_macos.command  ;;
             linux*)
               if [[ ${osrelease} == "micromamba" ]]; then
-                ${bashx} ${WGSEFIN}/Install_Linux_v2.sh
+                ${bashx} ${WGSEFIN}/Install_Linux_v2.sh "restart"
               else
                 ${bashx} Install_ubuntu.sh
               fi
