@@ -77,13 +77,13 @@ echo_tee ""
 if [[ ${VERBOSE_YN} == ["y","Y"] ]]; then
     echo_tee "Running in verbose mode."
     echo_tee ""
-    VERBOSE=""
-    VERBOSE_CURL=""
+    export VERBOSE=""
+    export VERBOSE_CURL=""
 else
     echo_tee "Running in quiet mode."
     echo_tee ""
-    VERBOSE="-q"
-    VERBOSE_CURL="-s"
+    export VERBOSE="-q"
+    export VERBOSE_CURL="-s"
 fi
 
 if [[ -d ${WGSEFIN}/micromamba/ ]]; then

@@ -55,7 +55,3 @@ if [[ ${UNINSTALL_DEL_YN} == ["y","Y"] ]]; then
     echo "WGS Extract has been uninstalled."
     echo ""
 fi
-
-echo "Exiting..."
-sleep 2
-echo ""

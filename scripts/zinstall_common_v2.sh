@@ -61,9 +61,9 @@ case "${OSTYPE}:${cpuarch}" in    # MacOS passes arch as first arg; maj/min vers
                               opt=""  ;;                        # $opt not recognized in 18.x Ubuntu pip
   linux*:20* | linux*:22*)  PIP=( pip3 )
                               cmdlist+=(          "$opt" )  ;;
-  linux*:micromamba)        PIP=( pip3 )
-                              opt+=" ${VERBOSE} --cache-dir ${WGSEFIN}/micromamba/cache/pip"  # Make sure to save cache files within micromamba environment directory
-                              cmdlist+=(          "$opt" )  ;;
+  linux*:micromamba)        PIP=( pip3 )                        # Make sure to save cache files within micromamba environment directory
+                              opt+=" --cache-dir ${WGSEFIN}/micromamba/cache/pip ${VERBOSE}"
+                              IFS=" " read -r -a optArray <<< "${opt}" ;;
   msys* | cygwin*)          PIP=( python/python.exe -m pip )    # pip3 in cygwin64 requires python/ and
                               cmdlist+=(          "$opt" )  ;;  #  python/scripts be on the path
   *)  printf "*** Error: unknown OS:ARCH combination of %s:%s\n" "$OSTYPE" "$cpuarch"
@@ -72,12 +72,20 @@ esac
 
 [ ! -e temp ] && mkdir temp     # Make sure temp/ folder is there to take pip_install.log; could put in scripts/ ?
 
-IFS=" " read -r -a cmd <<< "${PIP[@]}" ; cmd+=(install --upgrade pip "$opt")
-"${cmd[@]}" | tee    temp/pip_install.log | grep -v "Requirement already satisfied\|^Collecting\|Preparing\|Running\|Using legacy\|Using cached"
+if [[ ${cpuarch} == "micromamba" ]]; then
+  IFS=" " read -r -a cmd <<< "${PIP[@]}" ; cmd+=( install --upgrade pip "${optArray[@]}" )
+  "${cmd[@]}" | tee    temp/pip_install.log | grep -v "Requirement already satisfied\|^Collecting\|Preparing\|Running\|Using legacy\|Using cached"
 
-IFS=" " read -r -a cmd <<< "${PIP[@]}" ; cmd+=( "${cmdlist[@]}" )
-"${cmd[@]}" | tee -a temp/pip_install.log | grep -v "Requirement already satisfied\|^Collecting\|Preparing\|Running\|Using legacy\|Using cached"
-# We use the GREP to remove the common, success strings on the many packages and dependencies.  Slims down output.
+  IFS=" " read -r -a cmd <<< "${PIP[@]}" ; cmd+=( "${cmdlist[@]}" "${optArray[@]}" )
+  "${cmd[@]}" | tee -a temp/pip_install.log | grep -v "Requirement already satisfied\|^Collecting\|Preparing\|Running\|Using legacy\|Using cached"
+else
+  IFS=" " read -r -a cmd <<< "${PIP[@]}" ; cmd+=(install --upgrade pip "$opt")
+  "${cmd[@]}" | tee    temp/pip_install.log | grep -v "Requirement already satisfied\|^Collecting\|Preparing\|Running\|Using legacy\|Using cached"
+
+  IFS=" " read -r -a cmd <<< "${PIP[@]}" ; cmd+=( "${cmdlist[@]}" )
+  "${cmd[@]}" | tee -a temp/pip_install.log | grep -v "Requirement already satisfied\|^Collecting\|Preparing\|Running\|Using legacy\|Using cached"
+  # We use the GREP to remove the common, success strings on the many packages and dependencies.  Slims down output.
+fi
 
 # Todo MultiQC has bug with Windows release; cannot run from different disk than files it operates on
 #   so need to patch the python code in the library to get around / enable.
