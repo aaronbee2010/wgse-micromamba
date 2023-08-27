@@ -79,12 +79,10 @@ if [[ $1 != "restart" ]]; then
         echo_tee "Running in verbose mode."
         echo_tee ""
         export VERBOSE=""
-        export VERBOSE_CURL=""
     else
         echo_tee "Running in quiet mode."
         echo_tee ""
         export VERBOSE="-q"
-        export VERBOSE_CURL="-s"
     fi
 
     if [[ -d ${WGSEFIN}/micromamba/ ]]; then
@@ -117,7 +115,7 @@ if [ -f "${WGSEFIN}/micromamba/bin/micromamba" ]; then
 fi
 
 if command -v curl &>/dev/null; then
-    curl -L ${VERBOSE_CURL} https://github.com/mamba-org/micromamba-releases/releases/latest/download/micromamba-linux-64 -o ${WGSEFIN}/micromamba/bin/micromamba
+    curl -L https://github.com/mamba-org/micromamba-releases/releases/latest/download/micromamba-linux-64 -o ${WGSEFIN}/micromamba/bin/micromamba
 elif command -v wget &>/dev/null; then
     wget ${VERBOSE} -O ${WGSEFIN}/micromamba/bin/micromamba https://github.com/mamba-org/micromamba-releases/releases/latest/download/micromamba-linux-64
 else

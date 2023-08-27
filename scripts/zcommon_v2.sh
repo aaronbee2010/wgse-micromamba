@@ -46,8 +46,6 @@ case $OSTYPE in
       # We'll set osrelease to micromamba while we're here, so we can
       # have other parts of the code run properly if micromamba has been installed
       osrelease="micromamba"
-      # Carry over verbosity settings from Install_Linux(_v2).sh
-      export curlx="curl -kLC - --retry 5 ${VERBOSE_CURL}"
     else
       bashx="/usr/bin/bash"
     fi
