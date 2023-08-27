@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# WGS Extract v4 in-place common install script (all platforms; was Upgrade_UbuntuLinux.sh in v3)
-# Copyright (C) 2021-2022 Randolph Harr
+# WGS Extract v5 in-place common install script (all platforms; was Upgrade_UbuntuLinux.sh in v3)
+# Copyright (C) 2021-2023 Randolph Harr
 #
 # License: GNU General Public License v3 or later
 # A copy of GNU GPL v3 should have been included in this software package in LICENSE.txt.
 #
 
 # We try to do OS specific stuff in the OS main installer before calling this common installer.
-# Serves as a first-time install, upgrade from v2 to v3 to v4, as well as minor release updater (re-entrant)
+# Serves as a first-time install, upgrade from v2 to v3 to v4 to v5, as well as minor release updater (re-entrant)
 # Cleans out old release files from v3 and v2 that are no longer used.
 # Will fill in any missing reference genomes by user request at the end IF a Fresh install
 
@@ -21,12 +21,26 @@ fi
 # echo "Starting $0 $* with $# parameters"
 # echo Using Shell `ps -p $$ | grep -v PID | xargs | cut -d" " -f4`
 
+if [[ -z ${WGSEFIN:+set} ]]; then           # If not already set ...
+  # -------------------------------------- SETUP PATH TO WGSE INSTALLATION ------------------------------------------
+  # Find the installation directory (normally part of zcommon.sh but when run standalone, cannot find that script)
+  WGSEDIR=$(/usr/bin/dirname "${BASH_SOURCE[0]}")   # Get the script location to determine install directory
+  WGSEABS=$(cd "$WGSEDIR" || true; pwd -P)                  # By cd'ing to it, resolve any aliases and symlinks
+  [[ $(/usr/bin/basename "${WGSEABS}") == "scripts" ]] && WGSEFIN=$(/usr/bin/dirname "${WGSEABS}") || WGSEFIN="${WGSEABS}"
+fi
+
 # Common environment setup for scripts here; sets some variables used later so we declare first so shellcheck knows set
 declare bashx
 declare reflibdir
 declare replace
 declare upgrade
-source ${WGSEFIN}/scripts/zcommon_v2.sh dummy
+declare proc_refgenomes
+if ! source "${WGSEFIN}/scripts/zcommon.sh" dummy ; then
+  echo "*** ERROR sourcing scripts/zcommon.sh in ${BASH_SOURCE[0]}. Exiting."
+  exit 1
+fi
+
+cd "${WGSEFIN}" || true
 
 # cpuarch=$(uname -m)   # Now passed in as first parameter just so we can require a parameter for this internal script
 cpuarch=$1
@@ -49,8 +63,8 @@ echo "Installing and Upgrading Python libraries on ${OSTYPE}:$1 ... see temp/pip
 
 opt="--no-warn-script-location"
 
-cmdlist=( install Pillow pyliftover pyscreenshot openpyxl pandas psutil multiqc wakepy )
-# bio (brings biopython, numpy, requests urllib3), pyfaidx, pysocks, pySam (python v2 only), elevate
+cmdlist=(Pillow pyliftover pyscreenshot openpyxl pandas psutil multiqc wakepy cython numpy pysam crossmap)
+# bio (brings biopython, numpy, requests, urllib3), pyfaidx, pysocks, pySam (python v2 only), elevate
 
 case "${OSTYPE}:${cpuarch}" in    # MacOS passes arch as first arg; maj/min version as 2nd/3rd; Ubuntu maj as first
   darwin*:arm64*)           PIP=( arch -arm64  /usr/local/bin/pip3 )
@@ -63,7 +77,7 @@ case "${OSTYPE}:${cpuarch}" in    # MacOS passes arch as first arg; maj/min vers
                               cmdlist+=(          "$opt" )  ;;
   linux*:micromamba)        PIP=( pip3 )                        # Make sure to save cache files within micromamba environment directory
                               opt+=" --cache-dir ${WGSEFIN}/micromamba/cache/pip ${VERBOSE}"
-                              IFS=" " read -r -a optArray <<< "${opt}" ;;
+                              IFS=" " read -r -a optList <<< "${opt}" ;;
   msys* | cygwin*)          PIP=( python/python.exe -m pip )    # pip3 in cygwin64 requires python/ and
                               cmdlist+=(          "$opt" )  ;;  #  python/scripts be on the path
   *)  printf "*** Error: unknown OS:ARCH combination of %s:%s\n" "$OSTYPE" "$cpuarch"
@@ -71,21 +85,15 @@ case "${OSTYPE}:${cpuarch}" in    # MacOS passes arch as first arg; maj/min vers
 esac
 
 [ ! -e temp ] && mkdir temp     # Make sure temp/ folder is there to take pip_install.log; could put in scripts/ ?
+strip='Requirement already satisfied|^Collecting|Obtaining|Preparing|Running|Using legacy|Using cached|^Downloading|Building|Created|Stored'
 
-if [[ ${cpuarch} == "micromamba" ]]; then
-  IFS=" " read -r -a cmd <<< "${PIP[@]}" ; cmd+=( install --upgrade pip "${optArray[@]}" )
-  "${cmd[@]}" | tee    temp/pip_install.log | grep -v "Requirement already satisfied\|^Collecting\|Preparing\|Running\|Using legacy\|Using cached"
+IFS=" " read -r -a cmd <<< "${PIP[@]}" ; cmd+=( install --upgrade pip "${optArray[@]}" )
+"${cmd[@]}" | tee    temp/pip_install.log | grep -v "$strip"
 
-  IFS=" " read -r -a cmd <<< "${PIP[@]}" ; cmd+=( "${cmdlist[@]}" "${optArray[@]}" )
-  "${cmd[@]}" | tee -a temp/pip_install.log | grep -v "Requirement already satisfied\|^Collecting\|Preparing\|Running\|Using legacy\|Using cached"
-else
-  IFS=" " read -r -a cmd <<< "${PIP[@]}" ; cmd+=(install --upgrade pip "$opt")
-  "${cmd[@]}" | tee    temp/pip_install.log | grep -v "Requirement already satisfied\|^Collecting\|Preparing\|Running\|Using legacy\|Using cached"
+IFS=" " read -r -a cmd <<< "${PIP[@]}" ; cmd+=( install "${cmdlist[@]}" "${optArray[@]}" )
+"${cmd[@]}" | tee -a temp/pip_install.log | grep -v "$strip"
 
-  IFS=" " read -r -a cmd <<< "${PIP[@]}" ; cmd+=( "${cmdlist[@]}" )
-  "${cmd[@]}" | tee -a temp/pip_install.log | grep -v "Requirement already satisfied\|^Collecting\|Preparing\|Running\|Using legacy\|Using cached"
-  # We use the GREP to remove the common, success strings on the many packages and dependencies.  Slims down output.
-fi
+# We use the GREP to remove the common, success strings on the many packages and dependencies.  Slims down output.
 
 # Todo MultiQC has bug with Windows release; cannot run from different disk than files it operates on
 #   so need to patch the python code in the library to get around / enable.
@@ -110,12 +118,12 @@ echo '==========================================================================
 run_library=false
 install_or_upgrade program
 $replace && ! $upgrade && run_library=true
+# replace, upgrade and run_library are our special pseudo-boolean types. See note in zcommon.sh
 
 echo
 echo '======================================================================================================'
 # Check and Install or Upgrade WGS Extract Reference Library templates and scripts files
 install_or_upgrade reflib
-proc_refgenomes="${WGSEFIN}/scripts/process_refgenomes.sh"  # Moved from reference/genomes/process_reference_genomes.sh
 
 echo
 echo '======================================================================================================'
@@ -177,7 +185,7 @@ if [[ -d reference_genomes && -d "${newlib}" ]]; then
   cd "${newlib}" || echo '***Internal ERROR: cd reference/genomes'
   echo 'Processing reference genomes for new reference library format'
   ${bashx} "${proc_refgenomes}" hg38.fa.gz hs37d5.fa.gz hs38.fa.gz human_g1k_v37.fasta.gz hg19_wgse.fa.gz
-  cd "${WGSEFIN}"
+  cd "${WGSEFIN}" || true
   echo
 fi
 
@@ -187,9 +195,9 @@ fi
 
 # FastQC is included in the tools package like yLeaf.  Not separately installed here.
 
-# Rename of Reference Genomes between versions v3, v4 Alpha, etc
+# Rename of Reference Genomes between versions v3, v4, etc
 cd "${reflibdir}genomes" || echo "*** ERROR: cd ${reflibdir}genomes"
-if [ -f "${reflibdir}genomes/chm13_v2.0.fna.gz" ]; then         # Location could be changed in v3 or v4
+if [ -f "${reflibdir}genomes/chm13_v2.0.fna.gz" ]; then         # Location can be changed by user
   echo 'Renaming T2T CHM13 reference genome to new standard'
   mv -f chm13_v2.0.fna.gz chm13v2.0.fa.gz
   rm -f chm13_v2.0* || true
@@ -203,9 +211,10 @@ cd "${WGSEFIN}" || echo "*** ERROR: cd ${WGSEFIN}"
 
 # Cleanup any v3 to v4 file changes
 (
-  cd "${reflibdir}"
+  cd "${reflibdir}" || true
   \rm -f genomes/*.sh || true           # Moved to scripts/ or deleted
   \rm -f TruSeq_Exome_TargetedRegions_v1.2_GRCh.bed xgen_plus_spikein.GRCh38.GRCh.bed || true  # renamed
+  \rm -f seed_genomes.csv || true       # Moved to program/ folder (so reflib is more static)
 )
 \rm -f WGSE_Betav3_Release_Notes.txt 00README_WGSEv3.txt || true     # Was left hanging around in v3 release by accident
 \rm -f samtools.exe.stackdump || true                    # Accidently left in an early Alpha v4 release
@@ -216,13 +225,18 @@ cd "${WGSEFIN}" || echo "*** ERROR: cd ${WGSEFIN}"
 \rm -f zcommon.sh zinstall_common.sh zinstall_stage2windows.sh zxterm.sh || true   # moved on 27 June 2022 to scripts/
 \rm -f program/version.json reference/version.json jartools/version.json || true   # renamed to $package.json
 \rm -f cygwin64/version.json cygwin64/usr/local/version.json || true               # renamed to $package.json
-\rm -f make_release.txt || true                                                     # Accidently left in v3 after install
+\rm -f make_release.txt || true                                                    # Accidently left in v3 after install
 (
-  cd scripts
+  cd scripts || true
   \rm -f zprocess_refgenomes.sh zget_and_process_refgenomes.sh zcompare_refgenomes.sh || true # removed added z from name
-  \rm -f get_and_process_refgenomes.sh || true      # Major change to script; became singular (added zlibrary_common.sh)
+  \rm -f get_and_process_refgenomes.sh || true      # Major change to script; became singular and zlibrary_common.sh)
+  \rm -f get_and_process_refgenome.sh zlibrary_common.sh || true  # replaced with get_andor_process_refgenomes.sh
+  \rm -f get_andor_process_refgenomes.sh || true   # Changed yet again to get_refgenomes.sh with no zlibrary_common.sh
   \rm -f make_release.sh make_release.txt || true   # Only needed by developers; not end users
 )
+
+# Cleanup v4 to v5 changes
+\rm -f Betav4_Release_Notes.txt scripts/00README_WGSEv4_scripts.txt "${reflibdir}Betav4_Release_Notes.txt" || true
 
 # We now remove files for OSs that are not installed here; leaving only one OS set of scripts
 case $OSTYPE in
@@ -240,15 +254,15 @@ case $OSTYPE in
 esac
 
 # Call Library* to allow user to add reference genomes IF full, new install; not on upgrade or no change
-run_library=false     # As of 4.40, since have get_and_process built into missing_refgenome check; disabling this
-if "$run_library"; then
+run_library=false  # As of 4.40, since have get_/process_ built into missing_refgenome check; disabling this
+if $run_library ; then
   echo
   echo 'Running the Library manager on a new or upgraded Reference Library.'
-  library_mngr="${WGSEFIN}/scripts/zlibrary_common.sh"
+  library_mngr="${WGSEFIN}/scripts/get_andor_process_refgenomes.sh"   # Removed from installer; only in program package
   if [[ -e "$library_mngr" ]]; then
-    ${bashx} "$library_mngr" dummy
+    ${bashx} "$library_mngr" library
   else
-    echo '*** ERROR cannot find the Reference Library scripts/zlibrary_common.sh file.'
+    echo '*** ERROR cannot find the scripts/get_andor_process_refgenomes.sh script file.'
   fi
 fi
 
