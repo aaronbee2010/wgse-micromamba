@@ -42,18 +42,16 @@ fi
 
 cd "${WGSEFIN}" || true
 
-# cpuarch=$(uname -m)   # Now passed in as first parameter just so we can require a parameter for this internal script
-cpuarch=$1
-case $OSTYPE in
-  linux*)
-    if [[ -d ${WGSEFIN}/micromamba/ ]]; then
-      cpuarch="micromamba" # Set $cpuarch to "micromamba" if files from a micromamba install are detected.
-    else
-      cpuarch=$2 # Instead use the Ubuntu major release number for the cpuarch variable
-    fi
-    ;;
-  darwin* | msys* | cygwin*)  ;;
-esac
+# Skip assignment of ${cpuarch} if script was executed by Install_Linux.sh (micromamba installer)
+if [[ ${cpuarch} != "micromamba" ]]; then
+  # cpuarch=$(uname -m)   # Now passed in as first parameter just so we can require a parameter for this internal script
+  cpuarch=$1
+  case $OSTYPE in
+    linux*)
+      cpuarch=$2 ;; # Instead use the Ubuntu major release number for the cpuarch variable
+    darwin* | msys* | cygwin*)  ;;
+  esac
+fi
 
 echo
 echo '======================================================================================================'

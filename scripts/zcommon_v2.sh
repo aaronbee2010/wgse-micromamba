@@ -39,8 +39,8 @@ case $OSTYPE in
       PATH="/opt/local/bin:/opt/local/sbin:${PATH}"
     fi   ;;
   linux*)
-    # If micromamba has been set up, then the bash bin from that env will get priority on $PATH
-    if [[ -d ${WGSEFIN}/micromamba/ ]]; then
+    # If the micromamba env has been activated, then the bash bin from that env will get priority on $PATH
+    if [[ ${cpuarch} == "micromamba" ]]; then
       # ${WGSEFIN}/micromamba/bin/bash
       bashx="bash"
       # We'll set osrelease to micromamba while we're here, so we can

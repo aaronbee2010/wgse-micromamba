@@ -23,6 +23,9 @@ echo_tee () {
 
 source ${WGSEFIN}/scripts/Terminal_Linux_v2.sh # Restart in Terminal if not in one
 
+# Make zinstall_common.sh and zcommon.sh aware that they were executed from this installer
+export cpuarch="micromamba"
+
 echo_tee ""
 echo_tee "\_/"
 echo_tee "/_\\"
