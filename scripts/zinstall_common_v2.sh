@@ -85,10 +85,10 @@ esac
 [ ! -e temp ] && mkdir temp     # Make sure temp/ folder is there to take pip_install.log; could put in scripts/ ?
 strip='Requirement already satisfied|^Collecting|Obtaining|Preparing|Running|Using legacy|Using cached|^Downloading|Building|Created|Stored'
 
-IFS=" " read -r -a cmd <<< "${PIP[@]}" ; cmd+=( install --upgrade pip "${optArray[@]}" )
+IFS=" " read -r -a cmd <<< "${PIP[@]}" ; cmd+=( install --upgrade pip "${optList[@]}" )
 "${cmd[@]}" | tee    temp/pip_install.log | grep -v "$strip"
 
-IFS=" " read -r -a cmd <<< "${PIP[@]}" ; cmd+=( install "${cmdlist[@]}" "${optArray[@]}" )
+IFS=" " read -r -a cmd <<< "${PIP[@]}" ; cmd+=( install "${cmdlist[@]}" "${optList[@]}" )
 "${cmd[@]}" | tee -a temp/pip_install.log | grep -v "$strip"
 
 # We use the GREP to remove the common, success strings on the many packages and dependencies.  Slims down output.
