@@ -120,7 +120,7 @@ fi
 if command -v curl &>/dev/null; then
     curl -L https://github.com/mamba-org/micromamba-releases/releases/latest/download/micromamba-linux-64 -o ${WGSEFIN}/micromamba/bin/micromamba
 elif command -v wget &>/dev/null; then
-    wget ${VERBOSE} -O ${WGSEFIN}/micromamba/bin/micromamba https://github.com/mamba-org/micromamba-releases/releases/latest/download/micromamba-linux-64
+    wget -O ${WGSEFIN}/micromamba/bin/micromamba https://github.com/mamba-org/micromamba-releases/releases/latest/download/micromamba-linux-64
 else
     echo_tee "ERROR: Neither curl or wget appear to be available on \$PATH."
     echo_tee "Please install one of these utilities then run this installer again."
