@@ -220,7 +220,7 @@ cd "${WGSEFIN}" || echo "*** ERROR: cd ${WGSEFIN}"
 \rm -f Start_* Upgrade_* Install_UbuntuLinux.sh Install_Win10.bat || true
 \rm -rf win10tools program/microarray || true    # Replaced with cygwin64 and reference/microarray; respectively
 \rm -f WGSE_Betav4_Release_Notes.txt || true     # Dropped WGSE_ prefix on 27 June 2022 (mid-Alpha 4l)
-\rm -f zcommon.sh zinstall_common_v2.sh zinstall_stage2windows.sh zxterm.sh || true   # moved on 27 June 2022 to scripts/
+\rm -f zcommon.sh zinstall_common.sh zinstall_stage2windows.sh zxterm.sh || true   # moved on 27 June 2022 to scripts/
 \rm -f program/version.json reference/version.json jartools/version.json || true   # renamed to $package.json
 \rm -f cygwin64/version.json cygwin64/usr/local/version.json || true               # renamed to $package.json
 \rm -f make_release.txt || true                                                    # Accidently left in v3 after install
