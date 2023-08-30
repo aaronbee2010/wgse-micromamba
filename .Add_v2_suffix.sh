@@ -4,7 +4,7 @@
 if [[ $# -ne 1 ]] ; then
   printf "Usage: source %s dummy\n" "$0"
   printf "  dummy is anything; required to avoid direct user click.\n"
-  printf "  This should only be called from the WGSE internal scripts.\n"
+  printf "  This script should only be executed by a developer.\n"
   (return 0 2>/dev/null) && return || exit
 fi
 
