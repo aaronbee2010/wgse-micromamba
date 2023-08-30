@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# WGS Extract v5 in-place common install script (all platforms; was Upgrade_UbuntuLinux_v2.sh in v3)
+# WGS Extract v5 in-place common install script (all platforms; was Upgrade_UbuntuLinux.sh in v3)
 # Copyright (C) 2021-2023 Randolph Harr
 #
 # License: GNU General Public License v3 or later
@@ -23,7 +23,7 @@ fi
 
 if [[ -z ${WGSEFIN:+set} ]]; then           # If not already set ...
   # -------------------------------------- SETUP PATH TO WGSE INSTALLATION ------------------------------------------
-  # Find the installation directory (normally part of zcommon_v2.sh but when run standalone, cannot find that script)
+  # Find the installation directory (normally part of zcommon.sh but when run standalone, cannot find that script)
   WGSEDIR=$(/usr/bin/dirname "${BASH_SOURCE[0]}")   # Get the script location to determine install directory
   WGSEABS=$(cd "$WGSEDIR" || true; pwd -P)                  # By cd'ing to it, resolve any aliases and symlinks
   [[ $(/usr/bin/basename "${WGSEABS}") == "scripts" ]] && WGSEFIN=$(/usr/bin/dirname "${WGSEABS}") || WGSEFIN="${WGSEABS}"
@@ -42,7 +42,7 @@ fi
 
 cd "${WGSEFIN}" || true
 
-# Skip assignment of ${cpuarch} if script was executed by Install_Linux_v2.sh (micromamba installer)
+# Skip assignment of ${cpuarch} if script was executed by Install_Linux.sh (micromamba installer)
 if [[ ${cpuarch} != "micromamba" ]]; then
   # cpuarch=$(uname -m)   # Now passed in as first parameter just so we can require a parameter for this internal script
   cpuarch=$1
@@ -116,7 +116,7 @@ echo '==========================================================================
 run_library=false
 install_or_upgrade program
 $replace && ! $upgrade && run_library=true
-# replace, upgrade and run_library are our special pseudo-boolean types. See note in zcommon_v2.sh
+# replace, upgrade and run_library are our special pseudo-boolean types. See note in zcommon.sh
 
 echo
 echo '======================================================================================================'
@@ -142,14 +142,14 @@ echo 'Cleaning up from any previous releases'
 \rm -rf Install_MacOSX.app Start_MacOSX.app Uninstall_MacOSX.app || true
 \rm -f Install_MacOSX.scpt Start_MacOSX.scpt Uninstall_MacOSX.scpt || true
 
-# renamed to just MacOS due to BigSur 11 and renamed _v2.sh to .command for easier click-start
-\rm -f Install_MacOSX_v2.sh Start_MacOSX_v2.sh Uninstall_MacOSX_v2.sh || true
+# renamed to just MacOS due to BigSur 11 and renamed .sh to .command for easier click-start
+\rm -f Install_MacOSX.sh Start_MacOSX.sh Uninstall_MacOSX.sh || true
 
-# Changed all OS specific START files to WGSExtract.xxx and changed from _v2.sh to .command on MacOS
-\rm -f Windows_START.bat MacOS_START_v2.sh Linux_START_v2.sh || true
+# Changed all OS specific START files to WGSExtract.xxx and changed from .sh to .command on MacOS
+\rm -f Windows_START.bat MacOS_START.sh Linux_START.sh || true
 
 \rm -f 00README.txt "WGSE Betav3 Release Notes.txt" set_WGSEpath.bat  || true
-\rm -f Upgrade_v2tov3.command Upgrade_v2tov3_v2.sh Upgrade_v2tov3.bat || true
+\rm -f Upgrade_v2tov3.command Upgrade_v2tov3.sh Upgrade_v2tov3.bat || true
 
 \rm -f WGSExtractv2b_Francais_Patch.zip WGSExtractv2b_MacOSX_Patchv3.zip WGSExtractv2b_MacOSX_Patchv4.zip || true
 
@@ -210,27 +210,27 @@ cd "${WGSEFIN}" || echo "*** ERROR: cd ${WGSEFIN}"
 # Cleanup any v3 to v4 file changes
 (
   cd "${reflibdir}" || true
-  \rm -f genomes/*_v2.sh || true           # Moved to scripts/ or deleted
+  \rm -f genomes/*.sh || true           # Moved to scripts/ or deleted
   \rm -f TruSeq_Exome_TargetedRegions_v1.2_GRCh.bed xgen_plus_spikein.GRCh38.GRCh.bed || true  # renamed
   \rm -f seed_genomes.csv || true       # Moved to program/ folder (so reflib is more static)
 )
 \rm -f WGSE_Betav3_Release_Notes.txt 00README_WGSEv3.txt || true     # Was left hanging around in v3 release by accident
 \rm -f samtools.exe.stackdump || true                    # Accidently left in an early Alpha v4 release
 # \rm -f jartools/GenomeAnalysisTK.jar jartools/picard.jar        # Distributed in v3 but never used. Will leave for now.
-\rm -f Start_* Upgrade_* Install_UbuntuLinux_v2.sh Install_Win10.bat || true
+\rm -f Start_* Upgrade_* Install_UbuntuLinux.sh Install_Win10.bat || true
 \rm -rf win10tools program/microarray || true    # Replaced with cygwin64 and reference/microarray; respectively
 \rm -f WGSE_Betav4_Release_Notes.txt || true     # Dropped WGSE_ prefix on 27 June 2022 (mid-Alpha 4l)
-\rm -f zcommon_v2.sh zinstall_common_v2_v2.sh zinstall_stage2windows_v2.sh zxterm_v2.sh || true   # moved on 27 June 2022 to scripts/
+\rm -f zcommon_v2.sh zinstall_common_v2.sh zinstall_stage2windows.sh zxterm.sh || true   # moved on 27 June 2022 to scripts/
 \rm -f program/version.json reference/version.json jartools/version.json || true   # renamed to $package.json
 \rm -f cygwin64/version.json cygwin64/usr/local/version.json || true               # renamed to $package.json
 \rm -f make_release.txt || true                                                    # Accidently left in v3 after install
 (
   cd scripts || true
-  \rm -f zprocess_refgenomes_v2.sh zget_and_process_refgenomes_v2.sh zcompare_refgenomes_v2.sh || true # removed added z from name
-  \rm -f get_and_process_refgenomes_v2.sh || true      # Major change to script; became singular and zlibrary_common_v2.sh)
-  \rm -f get_and_process_refgenome_v2.sh zlibrary_common_v2.sh || true  # replaced with get_andor_process_refgenomes_v2.sh
-  \rm -f get_andor_process_refgenomes_v2.sh || true   # Changed yet again to get_refgenomes_v2.sh with no zlibrary_common_v2.sh
-  \rm -f make_release_v2.sh make_release.txt || true   # Only needed by developers; not end users
+  \rm -f zprocess_refgenomes.sh zget_and_process_refgenomes.sh zcompare_refgenomes.sh || true # removed added z from name
+  \rm -f get_and_process_refgenomes.sh || true      # Major change to script; became singular and zlibrary_common.sh)
+  \rm -f get_and_process_refgenome.sh zlibrary_common.sh || true  # replaced with get_andor_process_refgenomes.sh
+  \rm -f get_andor_process_refgenomes.sh || true   # Changed yet again to get_refgenomes.sh with no zlibrary_common.sh
+  \rm -f make_release.sh make_release.txt || true   # Only needed by developers; not end users
 )
 
 # Cleanup v4 to v5 changes
@@ -239,16 +239,16 @@ cd "${WGSEFIN}" || echo "*** ERROR: cd ${WGSEFIN}"
 # We now remove files for OSs that are not installed here; leaving only one OS set of scripts
 case $OSTYPE in
   darwin*)
-    \rm -f Install_ubuntu_v2.sh Library_v2.sh WGSExtract_v2.sh scripts/zxterm_ubuntu_v2.sh Uninstall_ubuntu_v2.sh || true
-    \rm -f Install_windows.bat Library.bat WGSExtract.bat scripts/zinstall_stage2windows_v2.sh Uninstall_windows.bat || true
-    \rm -f Install_linux_v2.sh Library_Linux_v2.sh Terminal_Linux_v2.sh WGSExtract_Linux_v2.sh || true ;;
+    \rm -f Install_ubuntu.sh Library.sh WGSExtract.sh scripts/zxterm_ubuntu.sh Uninstall_ubuntu.sh || true
+    \rm -f Install_windows.bat Library.bat WGSExtract.bat scripts/zinstall_stage2windows.sh Uninstall_windows.bat || true
+    \rm -f Install_linux.sh Library_Linux.sh Terminal_Linux.sh WGSExtract_Linux.sh || true ;;
   linux*)
     \rm -f Install_macos.command Library.command WGSExtract.command Uninstall_macos.command || true
-    \rm -f Install_windows.bat Library.bat WGSExtract.bat scripts/zinstall_stage2windows_v2.sh Uninstall_windows.bat || true  ;;
+    \rm -f Install_windows.bat Library.bat WGSExtract.bat scripts/zinstall_stage2windows.sh Uninstall_windows.bat || true  ;;
   msys* | cygwin*)
-    \rm -f Install_ubuntu_v2.sh Library_v2.sh WGSExtract_v2.sh scripts/zxterm_ubuntu_v2.sh Uninstall_ubuntu_v2.sh || true
+    \rm -f Install_ubuntu.sh Library.sh WGSExtract.sh scripts/zxterm_ubuntu.sh Uninstall_ubuntu.sh || true
     \rm -f Install_macos.command Library.command WGSExtract.command Uninstall_macos.command || true
-    \rm -f Install_linux_v2.sh Library_Linux_v2.sh Terminal_Linux_v2.sh WGSExtract_Linux_v2.sh || true ;;
+    \rm -f Install_linux.sh Library_Linux.sh Terminal_Linux.sh WGSExtract_Linux.sh || true ;;
 esac
 
 # Call Library* to allow user to add reference genomes IF full, new install; not on upgrade or no change
@@ -256,11 +256,11 @@ run_library=false  # As of 4.40, since have get_/process_ built into missing_ref
 if $run_library ; then
   echo
   echo 'Running the Library manager on a new or upgraded Reference Library.'
-  library_mngr="${WGSEFIN}/scripts/get_andor_process_refgenomes_v2.sh"   # Removed from installer; only in program package
+  library_mngr="${WGSEFIN}/scripts/get_andor_process_refgenomes.sh"   # Removed from installer; only in program package
   if [[ -e "$library_mngr" ]]; then
     ${bashx} "$library_mngr" library
   else
-    echo '*** ERROR cannot find the scripts/get_andor_process_refgenomes_v2.sh script file.'
+    echo '*** ERROR cannot find the scripts/get_andor_process_refgenomes.sh script file.'
   fi
 fi
 

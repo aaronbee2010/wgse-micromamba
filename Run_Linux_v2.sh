@@ -24,7 +24,7 @@ echo "/ \\"
 echo ""
 
 if [[ ! -d ${WGSEFIN}/micromamba/ ]]; then
-    echo "ERROR: It appears you haven't installed WGS Extract via the \"install_v2.sh\" script."
+    echo "ERROR: It appears you haven't installed WGS Extract via the \"install.sh\" script."
     echo "Please install WGS Extract via this method then run this script."
     echo ""
     echo "Aborting..."

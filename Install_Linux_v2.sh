@@ -23,7 +23,7 @@ echo_tee () {
 
 source ${WGSEFIN}/scripts/Terminal_Linux_v2.sh # Restart in Terminal if not in one
 
-# Make zinstall_common_v2.sh and zcommon_v2.sh aware that they were executed from this installer
+# Make zinstall_common.sh and zcommon.sh aware that they were executed from this installer
 export cpuarch="micromamba"
 
 echo_tee ""
@@ -250,7 +250,7 @@ status=$?
 if [[ $status -eq 0 ]]; then
     echo
     echo 'Congratulations!  You finished installing WGS Extract v4 on Linux!'
-    echo 'You can start WGS Extract v4 by clicking the WGSExtract_v2.sh file. Make a softlink, rename it to '
+    echo 'You can start WGS Extract v4 by clicking the WGSExtract.sh file. Make a softlink, rename it to '
     echo 'WGSExtract, and place it on your desktop for ease in starting the program.'
     echo
 elif [[ $status -eq 10 ]]; then
