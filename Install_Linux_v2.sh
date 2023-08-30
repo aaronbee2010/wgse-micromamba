@@ -134,6 +134,7 @@ eval "$(${WGSEFIN}/micromamba/bin/micromamba shell hook -s bash --prefix ${WGSEF
 micromamba activate --prefix ${WGSEFIN}/micromamba
 micromamba update -y -a &>/dev/null
 
+echo_tee ""
 echo_tee "Initialisation complete. Within the WGS Extract runtime environment,"
 echo_tee "we will install packages required by WGS Extract."
 echo_tee ""
@@ -153,7 +154,6 @@ micromamba_abort () {
     fi
 }
 
-echo_tee ""
 echo_tee "[1/5] Installing basic Unix utilities."
 echo_tee ""
 
