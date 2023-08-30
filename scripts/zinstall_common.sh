@@ -74,13 +74,14 @@ case "${OSTYPE}:${cpuarch}" in    # MacOS passes arch as first arg; maj/min vers
   linux*:20* | linux*:22*)  PIP=( pip3 )
                               cmdlist+=(          "$opt" )  ;;
   linux*:micromamba)        PIP=( pip3 )                        # Make sure to save cache files within micromamba environment directory
-                              opt+=" --cache-dir ${WGSEFIN}/micromamba/cache/pip ${VERBOSE}"
-                              IFS=" " read -r -a optList <<< "${opt}" ;;
+                              opt+=" --cache-dir ${WGSEFIN}/micromamba/cache/pip ${VERBOSE}" ;;
   msys* | cygwin*)          PIP=( python/python.exe -m pip )    # pip3 in cygwin64 requires python/ and
                               cmdlist+=(          "$opt" )  ;;  #  python/scripts be on the path
   *)  printf "*** Error: unknown OS:ARCH combination of %s:%s\n" "$OSTYPE" "$cpuarch"
       (return 0 2>/dev/null) && return 1 || exit 1 ;;
 esac
+
+IFS=" " read -r -a optList <<< "${opt}"
 
 [ ! -e temp ] && mkdir temp     # Make sure temp/ folder is there to take pip_install.log; could put in scripts/ ?
 strip='Requirement already satisfied|^Collecting|Obtaining|Preparing|Running|Using legacy|Using cached|^Downloading|Building|Created|Stored'
@@ -244,11 +245,17 @@ case $OSTYPE in
     \rm -f Install_linux.sh Library_Linux.sh Terminal_Linux.sh WGSExtract_Linux.sh || true ;;
   linux*)
     \rm -f Install_macos.command Library.command WGSExtract.command Uninstall_macos.command || true
-    \rm -f Install_windows.bat Library.bat WGSExtract.bat scripts/zinstall_stage2windows.sh Uninstall_windows.bat || true  ;;
+    \rm -f Install_windows.bat Library.bat WGSExtract.bat scripts/zinstall_stage2windows.sh Uninstall_windows.bat || true
+    if [[ ${cpuarch} == "micromamba" ]]; then
+      \rm -f Install_ubuntu.sh Library.sh WGSExtract.sh scripts/zxterm_ubuntu.sh Uninstall_ubuntu.sh || true
+    else
+      \rm -f Install_Linux.sh Library_Linux.sh scripts/Terminal_Linux.sh WGSExtract_Linux.sh Run_Linux.sh || true
+    fi
+    ;;
   msys* | cygwin*)
     \rm -f Install_ubuntu.sh Library.sh WGSExtract.sh scripts/zxterm_ubuntu.sh Uninstall_ubuntu.sh || true
     \rm -f Install_macos.command Library.command WGSExtract.command Uninstall_macos.command || true
-    \rm -f Install_linux.sh Library_Linux.sh Terminal_Linux.sh WGSExtract_Linux.sh || true ;;
+    \rm -f Install_Linux.sh Library_Linux.sh scripts/Terminal_Linux.sh WGSExtract_Linux.sh Run_Linux.sh || true ;;
 esac
 
 # Call Library* to allow user to add reference genomes IF full, new install; not on upgrade or no change
