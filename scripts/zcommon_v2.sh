@@ -18,7 +18,7 @@ if [ ! "${BASH}" ]; then
 fi
 
 export curlx="curl -kLC - --retry 5"
-export zipdir="WGSExtractv4"   # Directory stored in zip files (used in make_release.sh and installer)
+export zipdir="WGSExtractv4"   # Directory stored in zip files (used in make_release_v2.sh and installer)
 export release=WGSExtractv4    # Set toplevel folder inside .zip
 
 # Most of the declare and export statements are not needed as this file is sourced. We add them to document what is
@@ -142,7 +142,7 @@ case $OSTYPE in
 esac
 export pythonx  oWGSEFIN
 
-export process_refgenomes="${oWGSEFIN}/scripts/process_refgenomes.sh"
+export process_refgenomes="${oWGSEFIN}/scripts/process_refgenomes_v2.sh"
 
 # ------------------------------------------------------------------------------------------------
 #
@@ -184,7 +184,7 @@ export -f find_reflibdir
 # ------------------------------------------------------------------------------------------------
 # Version check system
 #  Similar function needed in install_windows.bat so replicated in cmd.exe there
-#  Could potentially be local to zinstall_common.sh but zinstall_stage2windows.sh needs also
+#  Could potentially be local to zinstall_common_v2.sh but zinstall_stage2windows_v2.sh needs also
 
 declare release_track base_url latest_package_url
 get_latest_json() {     # $1 is package; may get and use $base_url
@@ -327,7 +327,7 @@ export -f check_release_track
 
 # ------------------------------------------------------------------------------------------------
 # Install / Upgrade WGSE package system
-#  Could potentially be local to zinstall_common.sh but zinstall_stage2windows.sh needs also
+#  Could potentially be local to zinstall_common_v2.sh but zinstall_stage2windows_v2.sh needs also
 
 declare replace upgrade
 install_or_upgrade() {    # $1 is package
@@ -454,7 +454,7 @@ install_or_upgrade() {    # $1 is package
 
           { # *** Critical code area ; this script changes after cp. So force a pre-read of critical section
           \cp -rf ${zipdir}/* .         # Simply copy everything including this script (overwrite)
-          chmod a+x ./*.bat ./*.sh ./*.command scripts/*.sh   # Should be set in zip; but just in case
+          chmod a+x ./*.bat ./*_v2.sh ./*.command scripts/*_v2.sh   # Should be set in zip; but just in case
 
           # Ending this routine here as we are about to restart in a new script
           rm -rf ${zipdir} || true
@@ -473,7 +473,7 @@ install_or_upgrade() {    # $1 is package
               if [[ ${osrelease} == "micromamba" ]]; then
                 ${bashx} ${WGSEFIN}/Install_Linux_v2.sh "restart"
               else
-                ${bashx} Install_ubuntu.sh
+                ${bashx} Install_ubuntu_v2.sh
               fi
               ;;
           esac
@@ -482,7 +482,7 @@ install_or_upgrade() {    # $1 is package
 
         program)
           \cp -rf ${zipdir}/* .      # Includes program/, some scripts/, open_source_licenses/, WGSExtract*, Library*
-          chmod a+x ./*.bat ./*.sh ./*.command scripts/*.sh  ;;
+          chmod a+x ./*.bat ./*_v2.sh ./*.command scripts/*_v2.sh  ;;
 
         reflib)
           [ ! -d "${reflibdir}" ] && mkdir "${reflibdir}"   # Used to just copy zipdir which created reference/
@@ -517,7 +517,7 @@ export -f install_or_upgrade
 
 # ------------------------------------------------------------------------------------------------
 # Reference Genome Library Seed file load
-#  Code needed in get_and_process_refgenome.sh and zlibrary_common.sh so placed here
+#  Code needed in get_and_process_refgenome_v2.sh and zlibrary_common_v2.sh so placed here
 #  Seed genomes.csv has one row per genome; columns are:
 #   Python Genome Code, Final File Name, Downloaded File Name, URL, Library command menu string, SN Cnt, SN Name, Descr
 # Note: very order dependent here and in the genomes.csv file.  Also, true CSV with each field in double quotes and
